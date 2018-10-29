@@ -14,15 +14,15 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
 
-import Retro.MovieList;
+import Retro.TvSeriesList;
 
-class MovieAdapter extends BaseAdapter {
+class TvAdapter extends BaseAdapter {
 
     private Context context;
-    private List<MovieList> dataSet;
+    private List<TvSeriesList> dataSet;
     private int  height, width;
 
-    MovieAdapter(int height, int width,Context context, List<MovieList> dataSet){
+    TvAdapter(int height, int width,Context context, List<TvSeriesList> dataSet){
         this.height = height;
         this.width = width;
         this.context = context;
@@ -35,7 +35,7 @@ class MovieAdapter extends BaseAdapter {
     }
 
     @Override
-    public MovieList getItem(int i) {
+    public TvSeriesList getItem(int i) {
         return dataSet.get(i);
     }
 
@@ -66,14 +66,14 @@ class MovieAdapter extends BaseAdapter {
                 .into(background);
 
         TextView title =(TextView)cellView.findViewById(R.id.title);
-        title.setText(getItem(i).getTitle());
+        title.setText(getItem(i).getName());
         TextView rate =(TextView)cellView.findViewById(R.id.rate);
         NumberFormat formatter = new DecimalFormat("#0.00");
         rate.setText(formatter.format(getItem(i).getVoteAverage()));
         return cellView;
     }
 
-    public List<MovieList> getDataset(){
+    public List<TvSeriesList> getDataset(){
         return dataSet;
     }
 

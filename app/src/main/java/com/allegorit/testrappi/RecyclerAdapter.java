@@ -1,8 +1,9 @@
 package com.allegorit.testrappi;
 
 import android.app.Activity;
-import android.content.Context;
+import android.app.Application;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,7 +19,7 @@ import com.google.android.youtube.player.YouTubeThumbnailView;
 
 import java.util.List;
 
-public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.VideoInfoHolder> {
+public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.VideoInfoHolder>{
 
     private Activity activity;
     private List<String> videoKeys;
@@ -92,4 +93,5 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.VideoI
             activity.startActivity(intent);
         }
     }
+
 }

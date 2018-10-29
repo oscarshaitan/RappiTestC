@@ -11,6 +11,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -26,9 +28,11 @@ import java.util.List;
 import Retro.Genre;
 import Retro.GenreList;
 import Retro.MovieList;
+import Retro.TvSeriesList;
 import Retro.RetroDataService;
 import Retro.RetrofitClientInstance;
 import Retro.TopMovie;
+import Retro.TopTv;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
     private boolean onSearch = true;
     private FloatingActionButton Fab;
     private List<MovieList> allCachedMovie;
+    private List<TvSeriesList> allCachedTv;
+    private boolean isMovie = true;
+    private BottomNavigationView navigation;
 
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -85,8 +92,9 @@ public class MainActivity extends AppCompatActivity {
 
         gridL = (GridView) findViewById(R.id.gridL);
 
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -98,7 +106,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void populateGrid(String type){
         this.type = type;
-        changeFab(!onSearch);
+        changeFab(false);
+        Log.d("popuG",type);
+        Log.d("popuG",isMovie+"");
         if(type.equals("Popular")){
             getPopular(false);
         }
@@ -110,13 +120,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private void fillGrid(List<MovieList> topMovie){
         //page = topMovie.getPage();
         gridL.setAdapter(new  MovieAdapter(height, width,getApplicationContext(),topMovie));
         gridL.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(MainActivity.this, MovieDetail.class);
+                Intent intent = new Intent(MainActivity.this, Detail.class);
+                intent.putExtra("MID",""+gridL.getAdapter().getItemId(i));
+                intent.putExtra("isMovie",isMovie);
+                startActivity(intent);
+            }
+        });
+    }
+    private void fillGrid(List<TvSeriesList> topSeries, Boolean isMovie){
+        //page = topMovie.getPage();
+        gridL.setAdapter(new  TvAdapter(height, width,getApplicationContext(),topSeries));
+        gridL.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent(MainActivity.this, Detail.class);
                 intent.putExtra("MID",""+gridL.getAdapter().getItemId(i));
                 startActivity(intent);
             }
@@ -133,16 +157,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getCats(){
-        Call<GenreList> getGenres = (Call<GenreList>)service.getGenres(getResources().getString(R.string.api_key_tmdb));
-        getGenres.enqueue(new Callback<GenreList>() {
-            @Override
-            public void onResponse(Call<GenreList> call, Response<GenreList> response) {
-                findByCat(response.body().getGenres());
-            }
+        if(isMovie){
+            Call<GenreList> getGenres = (Call<GenreList>)service.getGenres(getResources().getString(R.string.api_key_tmdb));
+            getGenres.enqueue(new Callback<GenreList>() {
+                @Override
+                public void onResponse(Call<GenreList> call, Response<GenreList> response) {
+                    findByCat(response.body().getGenres());
+                }
 
-            @Override
-            public void onFailure(Call<GenreList> call, Throwable t) {}
-        });
+                @Override
+                public void onFailure(Call<GenreList> call, Throwable t) {}
+            });
+        }
+        else {
+            Call<GenreList> getGenres = (Call<GenreList>)service.getGenresTv(getResources().getString(R.string.api_key_tmdb));
+            getGenres.enqueue(new Callback<GenreList>() {
+                @Override
+                public void onResponse(Call<GenreList> call, Response<GenreList> response) {
+                    findByCat(response.body().getGenres());
+                }
+
+                @Override
+                public void onFailure(Call<GenreList> call, Throwable t) {}
+            });
+        }
+
 
     }
 
@@ -182,18 +221,34 @@ public class MainActivity extends AppCompatActivity {
                 .input("Action", "", new MaterialDialog.InputCallback() {
                     @Override
                     public void onInput(MaterialDialog dialog, CharSequence input) {
+                        if(isMovie){
+                            Call<TopMovie> searchList = (Call<TopMovie>)service.searchMovie(getResources().getString(R.string.api_key_tmdb),""+input);
+                            searchList.enqueue(new Callback<TopMovie>() {
+                                @Override
+                                public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
+                                    changeFab(!onSearch);
+                                    fillGrid(response.body().getResults());
+                                }
 
-                        Call<TopMovie> searchList = (Call<TopMovie>)service.searchMovie(getResources().getString(R.string.api_key_tmdb),""+input);
-                        searchList.enqueue(new Callback<TopMovie>() {
-                            @Override
-                            public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
-                                changeFab(!onSearch);
-                                fillGrid(response.body().getResults());
-                            }
+                                @Override
+                                public void onFailure(Call<TopMovie> call, Throwable t) {}
+                            });
+                        }
+                        else {
+                            Call<TopTv> searchList = (Call<TopTv>)service.searchTv(getResources().getString(R.string.api_key_tmdb),""+input);
+                            searchList.enqueue(new Callback<TopTv>() {
+                                @Override
+                                public void onResponse(Call<TopTv> call, Response<TopTv> response) {
+                                    changeFab(!onSearch);
+                                    fillGrid(response.body().getResults(),false);
+                                }
 
-                            @Override
-                            public void onFailure(Call<TopMovie> call, Throwable t) {}
-                        });
+                                @Override
+                                public void onFailure(Call<TopTv> call, Throwable t) {}
+                            });
+                        }
+
+
                     }
                 })
                 .show();
@@ -241,53 +296,125 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getPopular(final boolean addToAll){
-        Call<TopMovie> popularList = (Call<TopMovie>)service.getPopular(getResources().getString(R.string.api_key_tmdb));
-        popularList.enqueue(new Callback<TopMovie>() {
-            @Override
-            public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
-                if(!addToAll)fillGrid(response.body().getResults());
-                else{
-                    allCachedMovie.addAll(response.body().getResults());
-                    getRated(true);
+        Log.d("getPop",isMovie+"");
+        if(isMovie){
+            Call<TopMovie> popularList = (Call<TopMovie>)service.getPopular(getResources().getString(R.string.api_key_tmdb));
+            popularList.enqueue(new Callback<TopMovie>() {
+                @Override
+                public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
+                    if(!addToAll)fillGrid(response.body().getResults());
+                    else{
+                        allCachedMovie.addAll(response.body().getResults());
+                        getRated(true);
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<TopMovie> call, Throwable t) {}
-        });
+                @Override
+                public void onFailure(Call<TopMovie> call, Throwable t) {}
+            });
+        }
+        else {
+            Call<TopTv> popularList = (Call<TopTv>)service.getPopularTv(getResources().getString(R.string.api_key_tmdb));
+            popularList.enqueue(new Callback<TopTv>() {
+                @Override
+                public void onResponse(Call<TopTv> call, Response<TopTv> response) {
+                    Log.d("popularListR",response.isSuccessful()+"");
+                    if(!addToAll)fillGrid(response.body().getResults(),false);
+                    else{
+                        allCachedTv.addAll(response.body().getResults());
+                        getRated(true);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<TopTv> call, Throwable t) {
+                    Log.d("popularListR",t+"");}
+            });
+        }
+
     }
 
-    public void getRated(final boolean addToAll){
-        Call<TopMovie> popularList = (Call<TopMovie>)service.getTop(getResources().getString(R.string.api_key_tmdb));
-        popularList.enqueue(new Callback<TopMovie>() {
-            @Override
-            public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
+    public void getRated(final boolean addToAll) {
+        if (isMovie) {
+            Call<TopMovie> popularList = (Call<TopMovie>) service.getTop(getResources().getString(R.string.api_key_tmdb));
+            popularList.enqueue(new Callback<TopMovie>() {
+                @Override
+                public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
 
-                if(!addToAll)fillGrid(response.body().getResults());
-                else {
-                    allCachedMovie.addAll(response.body().getResults());
-                    getUpcomming(true);
+                    if (!addToAll) fillGrid(response.body().getResults());
+                    else {
+                        allCachedMovie.addAll(response.body().getResults());
+                        getUpcomming(true);
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<TopMovie> call, Throwable t) {}
-        });
+                @Override
+                public void onFailure(Call<TopMovie> call, Throwable t) {
+                }
+            });
+        }
+        else {
+            Call<TopTv> popularList = (Call<TopTv>)service.getTopTv(getResources().getString(R.string.api_key_tmdb));
+            popularList.enqueue(new Callback<TopTv>() {
+                @Override
+                public void onResponse(Call<TopTv> call, Response<TopTv> response) {
+
+                    if(!addToAll)fillGrid(response.body().getResults(),false);
+                    else {
+                        allCachedTv.addAll(response.body().getResults());
+                        getUpcomming(true);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<TopTv> call, Throwable t) {}
+            });
+        }
+
     }
 
     public void getUpcomming(final boolean addToAll){
-        Call<TopMovie> popularList = (Call<TopMovie>)service.getUpcoming(getResources().getString(R.string.api_key_tmdb));
-        popularList.enqueue(new Callback<TopMovie>() {
-            @Override
-            public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
+        if(isMovie){
+            Call<TopMovie> popularList = (Call<TopMovie>)service.getUpcoming(getResources().getString(R.string.api_key_tmdb));
+            popularList.enqueue(new Callback<TopMovie>() {
+                @Override
+                public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
 
-                if(!addToAll)fillGrid(response.body().getResults());
-                else allCachedMovie.addAll(response.body().getResults());
-            }
+                    if(!addToAll)fillGrid(response.body().getResults());
+                    else allCachedMovie.addAll(response.body().getResults());
+                }
 
-            @Override
-            public void onFailure(Call<TopMovie> call, Throwable t) {}
-        });
+                @Override
+                public void onFailure(Call<TopMovie> call, Throwable t) {}
+            });
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.movie:
+                isMovie = true;
+                navigation.getMenu().findItem(R.id.navigation_notifications).setVisible(true);
+                populateGrid(type);
+                navigation.setSelectedItemId(0);
+                return true;
+            case R.id.tv:
+                isMovie = false;
+                navigation.getMenu().findItem(R.id.navigation_notifications).setVisible(false);
+                populateGrid(type);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
 
