@@ -10,13 +10,13 @@ public interface RetroDataService {
     //Movie
 
     @GET("movie/popular")
-    Call<TopMovie> getPopular(@Query("api_key") String api_key);
+    Call<TopMovie> getPopular(@Query("api_key") String api_key, @Query("page") String page);
 
     @GET("movie/top_rated")
-    Call<TopMovie> getTop(@Query("api_key") String api_key);
+    Call<TopMovie> getTop(@Query("api_key") String api_key, @Query("page") String page);
 
     @GET("movie/upcoming")
-    Call<TopMovie> getUpcoming(@Query("api_key") String api_key);
+    Call<TopMovie> getUpcoming(@Query("api_key") String api_key, @Query("page") String page);
 
     @GET("movie/{movie_id}")
     Call<MyMovie> getMovie(@Path("movie_id") String movie_id, @Query("api_key") String api_key);
@@ -33,10 +33,10 @@ public interface RetroDataService {
     //TV
 
     @GET("tv/popular")
-    Call<TopTv> getPopularTv(@Query("api_key") String api_key);
+    Call<TopTv> getPopularTv(@Query("api_key") String api_key, @Query("page") String page);
 
     @GET("tv/top_rated")
-    Call<TopTv> getTopTv(@Query("api_key") String api_key);
+    Call<TopTv> getTopTv(@Query("api_key") String api_key, @Query("page") String page);
 
     @GET("tv/{tv_id}")
     Call<MyTv> getTv(@Path("tv_id") String movie_id, @Query("api_key") String api_key);

@@ -11,7 +11,7 @@ public class TvSeriesList {
     private String originalName;
     @SerializedName("genre_ids")
     @Expose
-    private List<Integer> genreIds = null;
+    private List<Long> genreIds = null;
     @SerializedName("name")
     @Expose
     private String name;
@@ -54,11 +54,11 @@ public class TvSeriesList {
         this.originalName = originalName;
     }
 
-    public List<Integer> getGenreIds() {
+    public List<Long> getGenreIds() {
         return genreIds;
     }
 
-    public void setGenreIds(List<Integer> genreIds) {
+    public void setGenreIds(List<Long> genreIds) {
         this.genreIds = genreIds;
     }
 
@@ -148,6 +148,13 @@ public class TvSeriesList {
 
     public void setPosterPath(String posterPath) {
         this.posterPath = posterPath;
+    }
+
+    public boolean isGenre(Long genreID){
+        for (Long genreId : genreIds) {
+            if(genreId.equals(genreID))return true;
+        }
+        return false;
     }
 
 }

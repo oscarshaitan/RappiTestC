@@ -4,11 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -29,31 +29,29 @@ import java.util.List;
 
 import Retro.Genre;
 import Retro.GenreList;
-import Retro.MovieList;
 import Retro.RetroDataService;
 import Retro.RetrofitClientInstance;
-import Retro.TopMovie;
+import Retro.TopTv;
+import Retro.TvSeriesList;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
-
-    //private GridView gridL;
+public class TvActivity extends AppCompatActivity {
     private RecyclerView gridR;
     private RetroDataService service;
     private int  height, width;
     private String type;
     private boolean onSearch = false;
     private FloatingActionButton Fab;
-    private List<MovieList> allCachedMovie = new ArrayList<>();
+    private List<TvSeriesList> allCachedTv = new ArrayList<>();
     private List<Genre> genres= new ArrayList<>();
     private BottomNavigationView navigation;
     private LinearLayout animLay;
     private int page = 1;
-    private MovieAdapter movieAdapter;
     private GridLayoutManager gridLayoutManager;
     private EndlessRecyclerViewScrollListener scrollListener;
+    private TvAdapter2 tvAdapter;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -61,8 +59,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             scrollListener.resetState();
-            allCachedMovie.clear();
-            movieAdapter.clear();
+            allCachedTv.clear();
+            tvAdapter.clear();
             page = 1;
             switch (item.getItemId()) {
                 case R.id.navigation_popular:
@@ -70,9 +68,6 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case R.id.navigation_top_rated:
                     populateGrid("Top",1);
-                    return true;
-                case R.id.navigation_upcomming:
-                    populateGrid("Upcoming",1);
                     return true;
             }
             return false;
@@ -82,8 +77,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        //retrofit services
+        setContentView(R.layout.activity_tv);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         height = displayMetrics.heightPixels;
@@ -103,12 +97,13 @@ public class MainActivity extends AppCompatActivity {
         });
         gridLayoutManager = new GridLayoutManager(this,3);
 
+
         animLay = (LinearLayout)findViewById(R.id.animLay);
         //gridL = (GridView) findViewById(R.id.gridL);
         gridR = (RecyclerView) findViewById(R.id.gridR);
         gridR.setLayoutManager(gridLayoutManager);
-        movieAdapter = new MovieAdapter(height,width,this,allCachedMovie);
-        gridR.setAdapter(movieAdapter);
+        tvAdapter = new TvAdapter2(height,width,this,allCachedTv);
+        gridR.setAdapter(tvAdapter);
 
         scrollListener = new EndlessRecyclerViewScrollListener(gridLayoutManager) {
             @Override
@@ -120,7 +115,9 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         gridR.addOnScrollListener(scrollListener);
+
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation.getMenu().findItem(R.id.navigation_upcomming).setVisible(false);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         if(!isConnected()) Toast.makeText(this, "Mode Offline activated", Toast.LENGTH_SHORT).show();
@@ -128,9 +125,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadNextDataFromApi(int offset) {
-
         populateGrid(type,offset);
-
     }
 
     private void populateGrid(String type, int page){
@@ -142,14 +137,11 @@ public class MainActivity extends AppCompatActivity {
         if(type.equals("Top")){
             getRated(page);
         }
-        if(type.equals("Upcoming")){
-            getUpcomming(page);
-        }
     }
 
-    private void fillGrid(List<MovieList> topMovie){
-        movieAdapter.addItems(topMovie);
-        movieAdapter.notifyDataSetChanged();
+    private void fillGrid(List<TvSeriesList> topSeries){
+        tvAdapter.addItems(topSeries);
+        tvAdapter.notifyDataSetChanged();
     }
 
     public boolean isConnected(){
@@ -162,19 +154,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getCats(){
-            Call<GenreList> getGenres = (Call<GenreList>)service.getGenres(getResources().getString(R.string.api_key_tmdb));
-            getGenres.enqueue(new Callback<GenreList>() {
-                @Override
-                public void onResponse(Call<GenreList> call, Response<GenreList> response) {
-                    genres.addAll(response.body().getGenres());
-                    findByCat();
-                   // getAllCacheMovieLiest();
-                }
+        Call<GenreList> getGenres = (Call<GenreList>)service.getGenresTv(getResources().getString(R.string.api_key_tmdb));
+        getGenres.enqueue(new Callback<GenreList>() {
+            @Override
+            public void onResponse(Call<GenreList> call, Response<GenreList> response) {
+                genres.addAll(response.body().getGenres());
+                findByCatTv();
+            }
 
-                @Override
-                public void onFailure(Call<GenreList> call, Throwable t) {}
-            });
-
+            @Override
+            public void onFailure(Call<GenreList> call, Throwable t) {}
+        });
     }
 
     public void searchMode(){
@@ -190,12 +180,12 @@ public class MainActivity extends AppCompatActivity {
                 .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
                     @Override
                     public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
-                       if(dialog.getSelectedIndex()==0){
-                           genres.clear();
-                           getCats();
-                       }
-                       else if(dialog.getSelectedIndex()==1){
-                           searchOnline();
+                        if(dialog.getSelectedIndex()==0){
+                            genres.clear();
+                            getCats();
+                        }
+                        else if(dialog.getSelectedIndex()==1){
+                            searchOnline();
                         }
                         return false;
                     }
@@ -214,19 +204,13 @@ public class MainActivity extends AppCompatActivity {
                 .input("Action", "", new MaterialDialog.InputCallback() {
                     @Override
                     public void onInput(MaterialDialog dialog, final CharSequence input) {
-
-                        Call<TopMovie> searchList = (Call<TopMovie>)service.searchMovie(getResources().getString(R.string.api_key_tmdb),""+input);
-                        searchList.enqueue(new Callback<TopMovie>() {
-                            @Override
-                            public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
-                                changeFab(!onSearch);
-                                fillGrid(response.body().getResults());
-                            }
-
-                            @Override
-                            public void onFailure(Call<TopMovie> call, Throwable t) {}
-                        });
-
+                    Call<TopTv> searchList = (Call<TopTv>)service.searchTv(getResources().getString(R.string.api_key_tmdb),""+input);
+                    searchList.enqueue(new Callback<TopTv>() {
+                        @Override
+                        public void onResponse(Call<TopTv> call, Response<TopTv> response) {
+                            changeFab(!onSearch);
+                            fillGrid(response.body().getResults()); }@Override
+                        public void onFailure(Call<TopTv> call, Throwable t) {}});
                     }
                 })
                 .show();
@@ -238,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
         else Fab.setImageDrawable(getResources().getDrawable(R.drawable.search));
     }
 
-    public void findByCat(){
+    public void findByCatTv(){
         final List<String> genreStringList = new ArrayList<>();
         for (Genre genre : genres) {
             genreStringList.add(genre.getName());
@@ -251,15 +235,14 @@ public class MainActivity extends AppCompatActivity {
                 .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
                     @Override
                     public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
-                        List<MovieList>myMoviesResult = new ArrayList<>();
-
-                        for (MovieList movieList : movieAdapter.getDataset()) {
-                            if(movieList.isGenre(genres.get(dialog.getSelectedIndex()).getId())){
-                                myMoviesResult.add(movieList);
+                        List<TvSeriesList> myTvSerieList = new ArrayList<>();
+                        for (TvSeriesList tvSeriesList : tvAdapter.getDataset()) {
+                            if(tvSeriesList.isGenre(genres.get(dialog.getSelectedIndex()).getId())){
+                                myTvSerieList.add(tvSeriesList);
                             }
                         }
                         changeFab(!onSearch);
-                        fillGrid(myMoviesResult);
+                        fillGrid(myTvSerieList);
                         return false;
                     }
                 })
@@ -267,47 +250,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getPopular(final int newPage){
-        Call<TopMovie> popularList = (Call<TopMovie>)service.getPopular(getResources().getString(R.string.api_key_tmdb),""+newPage);
-        popularList.enqueue(new Callback<TopMovie>() {
+        Call<TopTv> popularList = (Call<TopTv>)service.getPopularTv(getResources().getString(R.string.api_key_tmdb), ""+newPage);
+        popularList.enqueue(new Callback<TopTv>() {
             @Override
-            public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
+            public void onResponse(Call<TopTv> call, Response<TopTv> response) {
                 fillGrid(response.body().getResults());
                 animateGridFadeIn();
             }
 
             @Override
-            public void onFailure(Call<TopMovie> call, Throwable t) {}
+            public void onFailure(Call<TopTv> call, Throwable t) {
+                Log.d("popularListR",t+"");}
         });
     }
 
     public void getRated(final int newPage) {
-
-        Call<TopMovie> popularList = (Call<TopMovie>) service.getTop(getResources().getString(R.string.api_key_tmdb),""+newPage);
-        popularList.enqueue(new Callback<TopMovie>() {
+        Call<TopTv> popularList = (Call<TopTv>)service.getTopTv(getResources().getString(R.string.api_key_tmdb),""+newPage);
+        popularList.enqueue(new Callback<TopTv>() {
             @Override
-            public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
+            public void onResponse(Call<TopTv> call, Response<TopTv> response) {
                 fillGrid(response.body().getResults());
                 animateGridFadeIn();
             }
 
             @Override
-            public void onFailure(Call<TopMovie> call, Throwable t) {
-                }
-            });
-    }
-
-    public void getUpcomming(final int newPage){
-
-        Call<TopMovie> popularList = (Call<TopMovie>)service.getUpcoming(getResources().getString(R.string.api_key_tmdb),""+newPage);
-        popularList.enqueue(new Callback<TopMovie>() {
-            @Override
-            public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
-                fillGrid(response.body().getResults());
-                animateGridFadeIn();
-            }
-
-            @Override
-            public void onFailure(Call<TopMovie> call, Throwable t) {}
+            public void onFailure(Call<TopTv> call, Throwable t) {}
         });
     }
 
@@ -323,11 +290,11 @@ public class MainActivity extends AppCompatActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.movie:
-                return true;
-            case R.id.tv:
-                Intent intent = new Intent(this,TvActivity.class);
+                Intent intent = new Intent(this,MainActivity.class);
                 startActivity(intent);
                 overridePendingTransition(R.anim.goup, R.anim.godown);
+                return true;
+            case R.id.tv:
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -342,4 +309,3 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
-

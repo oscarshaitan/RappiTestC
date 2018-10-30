@@ -29,9 +29,6 @@ public class RetrofitClientInstance {
                     .cache(cache)
                     .build();
 
-
-
-
             Gson gson = new GsonBuilder()
                     .setLenient()
                     .create();
