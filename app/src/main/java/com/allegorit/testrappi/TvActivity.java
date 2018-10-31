@@ -4,11 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -51,7 +51,7 @@ public class TvActivity extends AppCompatActivity {
     private int page = 1;
     private GridLayoutManager gridLayoutManager;
     private EndlessRecyclerViewScrollListener scrollListener;
-    private TvAdapter2 tvAdapter;
+    private TvAdapter tvAdapter;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -102,7 +102,7 @@ public class TvActivity extends AppCompatActivity {
         //gridL = (GridView) findViewById(R.id.gridL);
         gridR = (RecyclerView) findViewById(R.id.gridR);
         gridR.setLayoutManager(gridLayoutManager);
-        tvAdapter = new TvAdapter2(height,width,this,allCachedTv);
+        tvAdapter = new TvAdapter(height,width,this,allCachedTv);
         gridR.setAdapter(tvAdapter);
 
         scrollListener = new EndlessRecyclerViewScrollListener(gridLayoutManager) {
@@ -141,6 +141,11 @@ public class TvActivity extends AppCompatActivity {
 
     private void fillGrid(List<TvSeriesList> topSeries){
         tvAdapter.addItems(topSeries);
+        tvAdapter.notifyDataSetChanged();
+    }
+
+    private void fillGridSearch(List<TvSeriesList> topSeries){
+        tvAdapter.replaceItems(topSeries);
         tvAdapter.notifyDataSetChanged();
     }
 
@@ -208,8 +213,8 @@ public class TvActivity extends AppCompatActivity {
                     searchList.enqueue(new Callback<TopTv>() {
                         @Override
                         public void onResponse(Call<TopTv> call, Response<TopTv> response) {
-                            changeFab(!onSearch);
-                            fillGrid(response.body().getResults()); }@Override
+                            changeFab(true);
+                            fillGridSearch(response.body().getResults()); }@Override
                         public void onFailure(Call<TopTv> call, Throwable t) {}});
                     }
                 })
@@ -241,7 +246,7 @@ public class TvActivity extends AppCompatActivity {
                                 myTvSerieList.add(tvSeriesList);
                             }
                         }
-                        changeFab(!onSearch);
+                        changeFab(true);
                         fillGrid(myTvSerieList);
                         return false;
                     }

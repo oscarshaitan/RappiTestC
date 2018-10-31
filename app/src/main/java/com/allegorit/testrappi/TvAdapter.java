@@ -1,11 +1,14 @@
 package com.allegorit.testrappi;
 
-import android.content.Context;
+import android.app.Activity;
+import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -16,44 +19,40 @@ import java.util.List;
 
 import Retro.TvSeriesList;
 
-class TvAdapter extends BaseAdapter {
-
-    private Context context;
+public class TvAdapter extends RecyclerView.Adapter <TvAdapter.SimpleViewHolder> {
+    private Activity activity;
     private List<TvSeriesList> dataSet;
     private int  height, width;
 
-    TvAdapter(int height, int width,Context context, List<TvSeriesList> dataSet){
+    TvAdapter(int height, int width, Activity activity, List<TvSeriesList> dataSet){
         this.height = height;
         this.width = width;
-        this.context = context;
+        this.activity = activity;
         this.dataSet = dataSet;
     }
 
+
+    @NonNull
     @Override
-    public int getCount() {
-        return dataSet.size();
+    public SimpleViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.movie_cell, viewGroup, false);
+        return new SimpleViewHolder(view);
     }
 
     @Override
-    public TvSeriesList getItem(int i) {
-        return dataSet.get(i);
-    }
+    public void onBindViewHolder(@NonNull TvAdapter.SimpleViewHolder viewHolder, final int i) {
 
-    @Override
-    public long getItemId(int i) {
-        return dataSet.get(i).getId();
-    }
-
-    @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        View cellView = new View(context);
-        LayoutInflater inflater = (LayoutInflater) context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        cellView = inflater.inflate(R.layout.movie_cell,null);
-
-        ImageView background = (ImageView)cellView.findViewById(R.id.background);
-        background.setMinimumHeight(450);
-        background.setMinimumWidth((width-20)/3);
+        viewHolder.superLay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(activity, TvDetail.class);
+                intent.putExtra("MID",""+dataSet.get(i).getId());
+                activity.startActivity(intent);
+                activity.overridePendingTransition(R.anim.goup, R.anim.godown);
+            }
+        });
+        viewHolder.background.setMinimumHeight((int)(height*0.2343));
+        viewHolder.background.setMinimumWidth((width-20)/3);
 
         String url = "https://image.tmdb.org/t/p/w300"+getItem(i).getPosterPath();
 
@@ -61,20 +60,56 @@ class TvAdapter extends BaseAdapter {
         Picasso.get() //
                 .load(url) //
                 .placeholder(R.drawable.ic_launcher_background) //
-                .resize((width-20)/3,450)
-                .tag(context) //
-                .into(background);
+                .resize((width-20)/3,(int)(height*0.2343))
+                .tag(activity) //
+                .into(viewHolder.background);
 
-        TextView title =(TextView)cellView.findViewById(R.id.title);
-        title.setText(getItem(i).getName());
-        TextView rate =(TextView)cellView.findViewById(R.id.rate);
+        viewHolder.title.setText(getItem(i).getName());
         NumberFormat formatter = new DecimalFormat("#0.00");
-        rate.setText(formatter.format(getItem(i).getVoteAverage()));
-        return cellView;
+        viewHolder.rate.setText(formatter.format(getItem(i).getVoteAverage()));
     }
+
+
+
+    @Override
+    public int getItemCount() {
+        return dataSet.size();
+    }
+
+    public void clear(){
+        dataSet.clear();
+    }
+
+    public TvSeriesList getItem(int i){return dataSet.get(i);}
 
     public List<TvSeriesList> getDataset(){
         return dataSet;
     }
 
+    public long getItemId(int i) {
+        return dataSet.get(i).getId();
+    }
+
+    public void addItems(List<TvSeriesList> tvSeriesLists){
+        dataSet.addAll(tvSeriesLists);
+    }
+
+    public void replaceItems(List<TvSeriesList> tvSeriesLists) {
+        dataSet.removeAll(dataSet);
+        dataSet.addAll(tvSeriesLists);
+    }
+
+    public class SimpleViewHolder extends RecyclerView.ViewHolder {
+        ImageView background;
+        TextView title;
+        TextView rate;
+        LinearLayout superLay;
+        public SimpleViewHolder(@NonNull View itemView) {
+            super(itemView);
+            background = (ImageView)itemView.findViewById(R.id.background);
+            title =(TextView)itemView.findViewById(R.id.title);
+            rate =(TextView)itemView.findViewById(R.id.rate);
+            superLay = (LinearLayout)itemView.findViewById(R.id.superLay);
+        }
+    }
 }

@@ -52,7 +52,8 @@ public class MovieAdapter extends RecyclerView.Adapter <MovieAdapter.SimpleViewH
                 activity.overridePendingTransition(R.anim.goup, R.anim.godown);
             }
         });
-        viewHolder.background.setMinimumHeight(450);
+
+        viewHolder.background.setMinimumHeight((int)(height*0.2343));
         viewHolder.background.setMinimumWidth((width-20)/3);
 
         String url = "https://image.tmdb.org/t/p/w300"+getItem(i).getPosterPath();
@@ -61,12 +62,12 @@ public class MovieAdapter extends RecyclerView.Adapter <MovieAdapter.SimpleViewH
         Picasso.get() //
                 .load(url) //
                 .placeholder(R.drawable.ic_launcher_background) //
-                .resize((width-20)/3,450)
+                .resize((width-20)/3,(int)(height*0.2343))
                 .tag(activity) //
                 .into(viewHolder.background);
 
         viewHolder.title.setText(getItem(i).getTitle());
-        NumberFormat formatter = new DecimalFormat("#0.00");
+        NumberFormat formatter = new DecimalFormat("#0.0");
         viewHolder.rate.setText(formatter.format(getItem(i).getVoteAverage()));
     }
 

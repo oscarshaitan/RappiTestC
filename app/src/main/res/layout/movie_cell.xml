@@ -4,12 +4,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp"
-    android:orientation="vertical">
+
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:paddingTop="5dp"
+    android:orientation="vertical"
+    android:paddingStart="5dp"
+    android:paddingEnd="5dp">
 
     <android.support.v7.widget.CardView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:elevation="10dp">
 
         <ImageView
             android:id="@+id/background"
@@ -18,8 +24,6 @@
             android:scaleType="fitXY"
             android:src="@drawable/movie_sample" />
     </android.support.v7.widget.CardView>
-
-
     <RelativeLayout
         android:id="@+id/titleLay"
         android:layout_width="match_parent"
@@ -36,40 +40,35 @@
             android:layout_marginLeft="2dp"
             android:layout_marginEnd="7dp"
             android:layout_marginRight="7dp"
-            android:layout_marginBottom="2dp"
-            android:layout_toStartOf="@+id/textView"
-            android:layout_toLeftOf="@+id/textView"
+            android:layout_toStartOf="@+id/rate"
+            android:layout_toLeftOf="@+id/rate"
             android:ellipsize="end"
             android:maxLines="1"
             android:text="Title Sampleeee5222222222222eee"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="10dp" />
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="0dp"
-            android:layout_marginEnd="3dp"
-            android:layout_marginRight="3dp"
-            android:layout_toStartOf="@+id/rate"
-            android:layout_toLeftOf="@+id/rate"
-            android:text="Rate:"
-            android:textColor="@color/white"
-            android:textSize="10dp" />
 
         <TextView
             android:id="@+id/rate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginEnd="2dp"
-            android:layout_marginRight="2dp"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/star"
+            android:layout_toLeftOf="@+id/star"
             android:text="2.7"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="10dp" />
+
+        <ImageView
+            android:id="@+id/star"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/star_y"
+            android:tint="@color/yellow"
+            android:layout_alignParentRight="true" />
     </RelativeLayout>
 
 </LinearLayout>

@@ -1,9 +1,10 @@
 package com.allegorit.testrappi;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -82,8 +83,8 @@ public class TvDetail extends AppCompatActivity {
                 .tag(getApplicationContext()) //
                 .into(banner);
 
-        TextView title = (TextView)findViewById(R.id.title);
-        title.setText(tv.getName());
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        toolbar.setTitle(tv.getName());
 
         String release = tv.getFirstAirDate();
         try {

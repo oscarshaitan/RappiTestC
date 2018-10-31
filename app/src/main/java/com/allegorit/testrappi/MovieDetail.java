@@ -3,6 +3,7 @@ package com.allegorit.testrappi;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -83,8 +84,9 @@ public class MovieDetail extends YouTubeBaseActivity {
                 .tag(getApplicationContext()) //
                 .into(banner);
 
-        TextView title = (TextView)findViewById(R.id.title);
-        title.setText(movie.getTitle());
+
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        toolbar.setTitle(movie.getTitle());
 
         String release = movie.getReleaseDate();
         try {
@@ -142,7 +144,7 @@ public class MovieDetail extends YouTubeBaseActivity {
         recyclerView.setHasFixedSize(true);
         //to use RecycleView, you need a layout manager. default is LinearLayoutManager
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
-        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
         List<String> videoKeys = new ArrayList<>();
 

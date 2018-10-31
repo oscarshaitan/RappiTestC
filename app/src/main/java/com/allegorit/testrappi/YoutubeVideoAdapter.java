@@ -21,7 +21,7 @@ public class YoutubeVideoAdapter extends RecyclerView.Adapter<YoutubeVideoAdapte
 
     private Activity activity;
     private List<String> videoKeys;
-    private final String KEY ="KEY";
+    private final String KEY ="AIzaSyC_ytaMaqM4Fv2Ot27d6RkSgt7f-IHlVIE";
 
     public YoutubeVideoAdapter(Activity activity, List<String> videoKeys) {
         this.activity = activity;

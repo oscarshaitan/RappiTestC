@@ -2,6 +2,7 @@ package com.allegorit.testrappi;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -101,7 +102,9 @@ public class MainActivity extends AppCompatActivity {
                 else searchMode();
             }
         });
+
         gridLayoutManager = new GridLayoutManager(this,3);
+        onConfigurationChanged(getResources().getConfiguration());
 
         animLay = (LinearLayout)findViewById(R.id.animLay);
         //gridL = (GridView) findViewById(R.id.gridL);
@@ -149,6 +152,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void fillGrid(List<MovieList> topMovie){
         movieAdapter.addItems(topMovie);
+        movieAdapter.notifyDataSetChanged();
+    }
+
+    private void fillGridSearch(List<MovieList> topMovie){
+        movieAdapter.replaceItems(topMovie);
         movieAdapter.notifyDataSetChanged();
     }
 
@@ -215,16 +223,21 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onInput(MaterialDialog dialog, final CharSequence input) {
 
+                        Log.d("searchOnline",input+"");
+
                         Call<TopMovie> searchList = (Call<TopMovie>)service.searchMovie(getResources().getString(R.string.api_key_tmdb),""+input);
                         searchList.enqueue(new Callback<TopMovie>() {
                             @Override
                             public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
-                                changeFab(!onSearch);
-                                fillGrid(response.body().getResults());
+                                Log.d("searchOnline",call.request().url().toString()+"");
+                                Log.d("searchOnline",response.isSuccessful()+"");
+                                Log.d("searchOnline",response.body().getTotalResults()+"");
+                                changeFab(true);
+                                fillGridSearch(response.body().getResults());
                             }
 
                             @Override
-                            public void onFailure(Call<TopMovie> call, Throwable t) {}
+                            public void onFailure(Call<TopMovie> call, Throwable t) {Log.d("searchOnline",t+"");}
                         });
 
                     }
@@ -258,8 +271,8 @@ public class MainActivity extends AppCompatActivity {
                                 myMoviesResult.add(movieList);
                             }
                         }
-                        changeFab(!onSearch);
-                        fillGrid(myMoviesResult);
+                        changeFab(true);
+                        fillGridSearch(myMoviesResult);
                         return false;
                     }
                 })
@@ -339,6 +352,21 @@ public class MainActivity extends AppCompatActivity {
         Animation aniFadeo = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.fade_out);
         animLay.startAnimation(aniFadeo);
         animLay.startAnimation(aniFade);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if(newConfig.orientation==Configuration.ORIENTATION_LANDSCAPE){
+            gridLayoutManager.setSpanCount(5);
+        }
+        else {
+            gridLayoutManager.setSpanCount(3);
+        }
+        /*
+    public static final int ORIENTATION_LANDSCAPE = 2;
+    public static final int ORIENTATION_PORTRAIT = 1;*/
+        // TODO
     }
 
 }
