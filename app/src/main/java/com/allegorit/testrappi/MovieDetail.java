@@ -115,7 +115,7 @@ public class MovieDetail extends YouTubeBaseActivity {
 
         TextView rate = (TextView)findViewById(R.id.rate);
         NumberFormat formatter = new DecimalFormat("#0.0");
-        rate.setText(formatter.format(movie.getVoteAverage())+"/10.0");
+        rate.setText(formatter.format(movie.getVoteAverage())+"");
 
         TextView descrip = (TextView)findViewById(R.id.description);
         descrip.setText(movie.getOverview());
