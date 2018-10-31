@@ -40,7 +40,6 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    //private GridView gridL;
     private RecyclerView gridR;
     private RetroDataService service;
     private int  height, width;
@@ -107,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
         onConfigurationChanged(getResources().getConfiguration());
 
         animLay = (LinearLayout)findViewById(R.id.animLay);
-        //gridL = (GridView) findViewById(R.id.gridL);
         gridR = (RecyclerView) findViewById(R.id.gridR);
         gridR.setLayoutManager(gridLayoutManager);
         movieAdapter = new MovieAdapter(height,width,this,allCachedMovie);
@@ -131,9 +129,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadNextDataFromApi(int offset) {
-
         populateGrid(type,offset);
-
     }
 
     private void populateGrid(String type, int page){
@@ -176,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
                 public void onResponse(Call<GenreList> call, Response<GenreList> response) {
                     genres.addAll(response.body().getGenres());
                     findByCat();
-                   // getAllCacheMovieLiest();
                 }
 
                 @Override
@@ -366,7 +361,6 @@ public class MainActivity extends AppCompatActivity {
         /*
     public static final int ORIENTATION_LANDSCAPE = 2;
     public static final int ORIENTATION_PORTRAIT = 1;*/
-        // TODO
     }
 
 }
