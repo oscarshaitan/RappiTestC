@@ -5,7 +5,7 @@
     <string name="title_Upcomming">Upcomming</string>
     <string name="title_Tv">Series</string>
     <string name="title_movie">Movies</string>
-    <string name="api_key_tmdb">8eaa163e9ac108ea6d7cd1ea127329cb</string>
+    <string name="api_key_tmdb">KEY</string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
