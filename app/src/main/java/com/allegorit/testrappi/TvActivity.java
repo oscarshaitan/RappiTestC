@@ -90,6 +90,7 @@ public class TvActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if(onSearch){
                     changeFab(false);
+                    allCachedTv.clear();
                     populateGrid(type,1);
                 }
                 else searchMode();
@@ -138,6 +139,7 @@ public class TvActivity extends AppCompatActivity {
             getRated(page);
         }
     }
+
 
     private void fillGrid(List<TvSeriesList> topSeries){
         tvAdapter.addItems(topSeries);
@@ -247,7 +249,7 @@ public class TvActivity extends AppCompatActivity {
                             }
                         }
                         changeFab(true);
-                        fillGrid(myTvSerieList);
+                        fillGridSearch(myTvSerieList);
                         return false;
                     }
                 })

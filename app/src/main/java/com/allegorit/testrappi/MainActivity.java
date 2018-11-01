@@ -23,6 +23,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.ArrayList;
@@ -37,6 +38,9 @@ import Retro.TopMovie;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -82,7 +86,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
+
         //retrofit services
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -96,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if(onSearch){
                     changeFab(false);
+                    allCachedMovie.clear();
                     populateGrid(type,1);
                 }
                 else searchMode();
@@ -146,12 +153,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private void fillGrid(List<MovieList> topMovie){
         movieAdapter.addItems(topMovie);
         movieAdapter.notifyDataSetChanged();
     }
 
     private void fillGridSearch(List<MovieList> topMovie){
+
         movieAdapter.replaceItems(topMovie);
         movieAdapter.notifyDataSetChanged();
     }
@@ -217,17 +226,14 @@ public class MainActivity extends AppCompatActivity {
                 .input("Action", "", new MaterialDialog.InputCallback() {
                     @Override
                     public void onInput(MaterialDialog dialog, final CharSequence input) {
-
+                        changeFab(true);
                         Log.d("searchOnline",input+"");
 
                         Call<TopMovie> searchList = (Call<TopMovie>)service.searchMovie(getResources().getString(R.string.api_key_tmdb),""+input);
                         searchList.enqueue(new Callback<TopMovie>() {
                             @Override
                             public void onResponse(Call<TopMovie> call, Response<TopMovie> response) {
-                                Log.d("searchOnline",call.request().url().toString()+"");
-                                Log.d("searchOnline",response.isSuccessful()+"");
-                                Log.d("searchOnline",response.body().getTotalResults()+"");
-                                changeFab(true);
+
                                 fillGridSearch(response.body().getResults());
                             }
 
@@ -259,13 +265,13 @@ public class MainActivity extends AppCompatActivity {
                 .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
                     @Override
                     public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
-                        List<MovieList>myMoviesResult = new ArrayList<>();
-
+                        List<MovieList> myMoviesResult = new ArrayList<>();
                         for (MovieList movieList : movieAdapter.getDataset()) {
                             if(movieList.isGenre(genres.get(dialog.getSelectedIndex()).getId())){
                                 myMoviesResult.add(movieList);
                             }
                         }
+
                         changeFab(true);
                         fillGridSearch(myMoviesResult);
                         return false;

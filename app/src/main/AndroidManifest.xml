@@ -29,6 +29,9 @@
             android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity android:name=".TvActivity" />
         <activity android:name=".TvDetail" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="98d452998c19ffede56cc9bb976b614aa447e39e" />
     </application>
 
 </manifest>
